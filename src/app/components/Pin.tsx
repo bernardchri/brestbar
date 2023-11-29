@@ -13,7 +13,7 @@ const pinStyle = {
 function Pin({size = 20}) {
   return (
     <svg height={size} viewBox="0 0 24 24" style={pinStyle}>
-      <path d={ICON} />
+      {/* <path d={ICON} /> */}
     </svg>
   );
 }

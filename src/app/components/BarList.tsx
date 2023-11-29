@@ -16,9 +16,15 @@ import CardBar from "./CardBar";
 import CardBarDetails from "./CardBarDetails";
 import ControlPanel from "./ControlPanel";
 import Pin from "./Pin";
+import { FilterByRanking } from "./FilterByRanking";
 
-const mapToken =
+const MAP_TOKEN =
   "pk.eyJ1IjoiYmVyZ2FsbCIsImEiOiJjbHBpaG1ibHQwYzNpMnF0N3hybXJhN2FwIn0.D-0DuHpUtmg4dWSaP-QStw";
+const START_POSITION = {
+  longitude: -4.4834526,
+  latitude: 48.3831122,
+  zoom: 10,
+};
 export default function BarList(datas: DataFromApi) {
   const originList = datas.data;
   const [list, setList] = useState(datas.data);
@@ -27,6 +33,9 @@ export default function BarList(datas: DataFromApi) {
   const [showPanel, setShowPanel] = useState(false);
   const [dataSelected, setDataSelected] = useState<Bar | null>(null);
 
+  const [displayList, setDisplayList] = useState(5);
+
+  const [popupInfo, setPopupInfo] = useState<any>(null);
   // map
   const mapRef = useRef<MapRef>(null);
 
@@ -39,14 +48,10 @@ export default function BarList(datas: DataFromApi) {
 
     mapRef?.current?.easeTo({
       center: feature?.geometry.coordinates,
-      zoom,
+      zoom: 14,
       duration: 750,
     });
   };
-  const [lng, setLng] = useState(-4.4834526);
-  const [lat, setLat] = useState(48.3831122);
-  const [zoom, setZoom] = useState(15);
-  const [popupInfo, setPopupInfo] = useState({});
 
   const pins = useMemo(
     () =>
@@ -60,21 +65,14 @@ export default function BarList(datas: DataFromApi) {
             // If we let the click event propagates to the map, it will immediately close the popup
             // with `closeOnClick: true`
             e.originalEvent.stopPropagation();
-            setPopupInfo(bar);
+            onClickShowMoreDetail(bar);
           }}
         >
           <Pin />
         </Marker>
       )),
-    []
+    [list]
   );
-
-  const [viewPort, setViewPort] = useState({
-    longitude: lng,
-    latitude: lat,
-    zoom: zoom,
-    pitch: 10,
-  });
 
   const geojson: FeatureCollection = {
     type: "FeatureCollection",
@@ -111,14 +109,9 @@ export default function BarList(datas: DataFromApi) {
 
     mapRef?.current?.easeTo({
       center: [data.location.coordinates[0], data.location.coordinates[1]],
-      zoom,
+      zoom: 14,
       duration: 750,
     });
-  }
-
-  function hidePanel() {
-    console.log(showPanel);
-    setShowPanel(!showPanel);
   }
 
   function filterByCategory(numberOfCategory: number) {
@@ -128,8 +121,13 @@ export default function BarList(datas: DataFromApi) {
       );
       setList(filterByCategory);
     } else {
-      setList(originList);
+      resetFilters();
     }
+  }
+
+  function resetFilters() {
+    setDisplayList(5);
+    setList(originList);
   }
 
   return (
@@ -140,7 +138,10 @@ export default function BarList(datas: DataFromApi) {
         }`}
       >
         <div className="flex w-full justify-end px-4 py-2 lg:hidden">
-          <ButtonHideSiderBar handleClick={hidePanel} showPanel={showPanel} />
+          <ButtonHideSiderBar
+            handleClick={() => setShowPanel(!showPanel)}
+            showPanel={showPanel}
+          />
         </div>
         <div
           className={`${
@@ -155,34 +156,50 @@ export default function BarList(datas: DataFromApi) {
                   <Divider />
                   <ButtonSelectCategoryBar handleClick={filterByCategory} />
                   <Divider />
-                  <Divider />
                 </div>
                 <div className=" flex items-center justify-between p-4">
-                  <h2 className="text-2xl font-semibold">Explorer</h2>
-                  <button
-                    type="button"
-                    className="bg-gradient rounded-lg px-4 py-2 font-semibold"
-                  >
-                    Plus de filtres ✍️
-                  </button>
+                  <h2 className="text-2xl font-semibold">
+                    Explorer : {list.length} Bars
+                  </h2>
+                  {/* <button type="button" className="button-mini">
+                    Filtres
+                  </button> */}
                 </div>
-                <div className="p-4"> Nombres de resultats : {list.length}</div>
+                <FilterByRanking handleRating={changeRating} rating={rating} />
+                {/* <button>ouvert en ce moment</button> */}
+                <Divider />
+
                 <div className="p-4">
-                  {list.map((item: Bar) => (
-                    <CardBar
-                      key={item.id}
-                      datas={item}
-                      handleClick={onClickShowMoreDetail}
-                    />
-                  ))}
+                  {list.map(
+                    (item: Bar, index) =>
+                      index < displayList && (
+                        <CardBar
+                          key={item.id}
+                          datas={item}
+                          handleClick={onClickShowMoreDetail}
+                        />
+                      )
+                  )}
                 </div>
+
+                {list.length >= displayList && (
+                  <div className="flex w-full items-center justify-center mb-4">
+                    <button
+                      type="button"
+                      className="mx-auto w-fit rounded-lg bg-bg px-6 py-2"
+                      onClick={() => setDisplayList(displayList + 10)}
+                    >
+                      Plus
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               dataSelected !== null && (
                 <div className="">
                   <button
                     onClick={() => setShowList(!showList)}
-                    className="button-mini"
+                    className="button-mini px-4 py-2 m-4"
                   >
                     retour
                   </button>
@@ -196,13 +213,12 @@ export default function BarList(datas: DataFromApi) {
       <section className="absolute outline-dashed bottom-0 left-0 top-0 right-0 w-full bg-gray-200   overflow-hidden">
         <Map
           ref={mapRef}
-          mapboxAccessToken={mapToken}
+          mapboxAccessToken={MAP_TOKEN}
           initialViewState={{
-            longitude: lng,
-            latitude: lat,
-            zoom: zoom,
+            longitude: START_POSITION.longitude,
+            latitude: START_POSITION.latitude,
+            zoom: START_POSITION.zoom,
           }}
-          onMove={(evt) => setViewPort(evt.viewState)}
           onClick={onClickOnCircles}
           style={{ width: "100vw", height: "100vh" }}
           mapStyle="mapbox://styles/mapbox/dark-v10"
@@ -218,16 +234,20 @@ export default function BarList(datas: DataFromApi) {
           >
             <Layer {...clusterLayer} />
             <Layer {...clusterCountLayer} />
-            {/* <Layer {...unclusteredPointLayer} /> */}
-            <Layer {...unclusteredPointLayer}>{pins}</Layer>
+            <Layer {...unclusteredPointLayer} />
           </Source>
+          {pins}
 
           {popupInfo && (
             <Popup
               anchor="top"
-              longitude={Number("0")}
-              latitude={Number("0")}
-              onClose={() => setPopupInfo(null)}
+              longitude={Number(popupInfo.longitude)}
+              latitude={Number(popupInfo.latitude)}
+              onClose={() => {
+                setPopupInfo(null);
+                setDataSelected(null);
+                setShowPanel(false);
+              }}
             >
               <div>
                 {popupInfo.city}, {popupInfo.state} |{" "}

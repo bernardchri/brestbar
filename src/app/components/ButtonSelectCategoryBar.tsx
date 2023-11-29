@@ -61,7 +61,7 @@ const ButtonCategory = ({
       onClick={() => handleClick(id)}
     >
       <div
-        className={`flex aspect-square w-full items-center justify-center rounded-lg bg-bg text-4xl ${
+        className={`flex aspect-video w-full items-center justify-center rounded-lg bg-bg text-4xl ${
           isSelected === id ? " bg-gradient" : " "
         }`}
       >

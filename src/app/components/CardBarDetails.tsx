@@ -17,9 +17,9 @@ export default function CardBarDetails({ datas }: { datas: Bar }) {
       {datas?.website && (
         <SectionDataWebSite title="site internet" data={datas?.website} />
       )}
-      {datas.opening_hours && (
+      {/* {datas.opening_hours && (
         <SectionDataOpeningHours title="horaires" data={datas?.opening_hours} />
-      )}
+      )} */}
     </div>
   );
 }
@@ -117,9 +117,8 @@ const SectionDataWebSite = ({
 }) => (
   <div>
     <div className="mt-4 text-sm uppercase text-gray-400">{title} </div>
-    <a href={data} target="_blank">
-      {" "}
-      {data}{" "}
+    <a href={data} target="_blank" className="text-bleu underline">
+      Aller sur site web
     </a>
   </div>
 );
