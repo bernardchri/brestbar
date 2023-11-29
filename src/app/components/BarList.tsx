@@ -3,7 +3,7 @@ import type { FeatureCollection } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GeoJSONSource } from "react-map-gl";
-import Map, { Layer, MapRef, Marker, Popup, Source } from "react-map-gl";
+import Map, { Layer, MapRef, Marker, Source } from "react-map-gl";
 import {
   clusterCountLayer,
   clusterLayer,
@@ -15,8 +15,8 @@ import { ButtonSelectCategoryBar } from "./ButtonSelectCategoryBar";
 import CardBar from "./CardBar";
 import CardBarDetails from "./CardBarDetails";
 import ControlPanel from "./ControlPanel";
-import Pin from "./Pin";
 import { FilterByRanking } from "./FilterByRanking";
+import Pin from "./Pin";
 
 const MAP_TOKEN =
   "pk.eyJ1IjoiYmVyZ2FsbCIsImEiOiJjbHBpaG1ibHQwYzNpMnF0N3hybXJhN2FwIn0.D-0DuHpUtmg4dWSaP-QStw";
@@ -35,21 +35,19 @@ export default function BarList(datas: DataFromApi) {
 
   const [displayList, setDisplayList] = useState(5);
 
-  const [popupInfo, setPopupInfo] = useState<any>(null);
   // map
   const mapRef = useRef<MapRef>(null);
 
   const onClickOnCircles = (event: any) => {
-    // event.originalEvent.stopPropagation();
     const feature = event.features[0];
-    console.log(feature?.geometry.coordinates);
+
     const clusterId = feature?.properties.cluster_id;
     const mapboxSource = mapRef.current?.getSource("bars") as GeoJSONSource;
 
     mapRef?.current?.easeTo({
       center: feature?.geometry.coordinates,
-      zoom: 14,
       duration: 750,
+      zoom: 15,
     });
   };
 
@@ -60,7 +58,7 @@ export default function BarList(datas: DataFromApi) {
           key={`marker-${index}`}
           longitude={bar.location.coordinates[0]}
           latitude={bar.location.coordinates[1]}
-          anchor="bottom"
+          anchor="center"
           onClick={(e) => {
             // If we let the click event propagates to the map, it will immediately close the popup
             // with `closeOnClick: true`
@@ -109,7 +107,7 @@ export default function BarList(datas: DataFromApi) {
 
     mapRef?.current?.easeTo({
       center: [data.location.coordinates[0], data.location.coordinates[1]],
-      zoom: 14,
+      zoom: 15,
       duration: 750,
     });
   }
@@ -165,7 +163,10 @@ export default function BarList(datas: DataFromApi) {
                     Filtres
                   </button> */}
                 </div>
-                <FilterByRanking handleRating={changeRating} rating={rating} />
+                <FilterByRanking
+                  handleRating={(e : any) => setRating(e.target.value)}
+                  rating={rating}
+                />
                 {/* <button>ouvert en ce moment</button> */}
                 <Divider />
 
@@ -219,10 +220,13 @@ export default function BarList(datas: DataFromApi) {
             latitude: START_POSITION.latitude,
             zoom: START_POSITION.zoom,
           }}
+          onIdle={() => {
+            console.log(mapRef.current?.getZoom());
+          }}
           onClick={onClickOnCircles}
           style={{ width: "100vw", height: "100vh" }}
           mapStyle="mapbox://styles/mapbox/dark-v10"
-          interactiveLayerIds={[clusterLayer?.id]}
+          interactiveLayerIds={["clusters"]}
         >
           <Source
             id="bars"
@@ -235,32 +239,8 @@ export default function BarList(datas: DataFromApi) {
             <Layer {...clusterLayer} />
             <Layer {...clusterCountLayer} />
             <Layer {...unclusteredPointLayer} />
+            {pins}
           </Source>
-          {pins}
-
-          {popupInfo && (
-            <Popup
-              anchor="top"
-              longitude={Number(popupInfo.longitude)}
-              latitude={Number(popupInfo.latitude)}
-              onClose={() => {
-                setPopupInfo(null);
-                setDataSelected(null);
-                setShowPanel(false);
-              }}
-            >
-              <div>
-                {popupInfo.city}, {popupInfo.state} |{" "}
-                <a
-                  target="_new"
-                  href={`http://en.wikipedia.org/w/index.php?title=Special:Search&search=${popupInfo.city}, ${popupInfo.state}`}
-                >
-                  Wikipedia
-                </a>
-              </div>
-              <img width="100%" src={popupInfo.image} />
-            </Popup>
-          )}
         </Map>
         <ControlPanel />
       </section>
@@ -277,7 +257,7 @@ const EnTete = () => (
     <h1 className="text-4xl font-bold text-white">
       Trouver le bar qu’il vous faut
       <span className="bg-gradient bg-clip-text text-transparent ">
-        , juste le meilleur !
+        , juste le meilleur&nbsp;!
       </span>
     </h1>
   </div>

@@ -1,7 +1,7 @@
 import type {LayerProps} from 'react-map-gl';
 
 export const clusterLayer: LayerProps = {
-  id: 'clusters',
+  id: 'clusters-2',
   type: 'circle',
   source: 'bars',
   filter: ['has', 'point_count'],
@@ -29,9 +29,9 @@ export const unclusteredPointLayer: LayerProps = {
   source: 'bars',
   filter: ['!', ['has', 'point_count']],
   paint: {
-    'circle-color': '#11b4da',
-    'circle-radius': 4,
-    'circle-stroke-width': 1,
+    'circle-color': 'rgba(4,194,235,1)',
+    'circle-radius': 10,
+    'circle-stroke-width': 2,
     'circle-stroke-color': '#fff'
   }
 };
