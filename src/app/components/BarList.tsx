@@ -26,7 +26,8 @@ const START_POSITION = {
   zoom: 10,
 };
 export default function BarList(datas: DataFromApi) {
-  const originList = datas.data;
+  const originList = reorderByTheBest(datas.data);
+
   const [list, setList] = useState(datas.data);
   const [rating, setRating] = useState(3);
   const [showList, setShowList] = useState(false);
@@ -94,12 +95,9 @@ export default function BarList(datas: DataFromApi) {
     const newList = [...originList].filter(
       (item) => parseInt(item.rating) >= rating
     );
-    setList(newList);
-  }, [rating, originList]);
 
-  function changeRating(e: any) {
-    setRating(e.target.value);
-  }
+    setList(reorderByTheBest(newList));
+  }, [rating, originList]);
 
   function onClickShowMoreDetail(data: Bar) {
     setDataSelected(data);
@@ -110,6 +108,12 @@ export default function BarList(datas: DataFromApi) {
       zoom: 15,
       duration: 750,
     });
+  }
+
+  function reorderByTheBest(list: Bar[]) {
+    return list
+      .sort((a, b) => Number(b.rating) - Number(a.rating))
+      .sort((a, b) => b.user_ratings_total - a.user_ratings_total);
   }
 
   function filterByCategory(numberOfCategory: number) {
@@ -164,10 +168,9 @@ export default function BarList(datas: DataFromApi) {
                   </button> */}
                 </div>
                 <FilterByRanking
-                  handleRating={(e : any) => setRating(e.target.value)}
+                  handleRating={(e: any) => setRating(e.target.value)}
                   rating={rating}
                 />
-                {/* <button>ouvert en ce moment</button> */}
                 <Divider />
 
                 <div className="p-4">
@@ -220,9 +223,6 @@ export default function BarList(datas: DataFromApi) {
             latitude: START_POSITION.latitude,
             zoom: START_POSITION.zoom,
           }}
-          onIdle={() => {
-            console.log(mapRef.current?.getZoom());
-          }}
           onClick={onClickOnCircles}
           style={{ width: "100vw", height: "100vh" }}
           mapStyle="mapbox://styles/mapbox/dark-v10"
@@ -246,6 +246,11 @@ export default function BarList(datas: DataFromApi) {
       </section>
     </>
   );
+}
+
+function test(data: Bar[]) {
+  let hours = data.filter((bar) => bar.opening_hours === null || undefined);
+  console.log(hours);
 }
 
 const Divider = () => (

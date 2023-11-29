@@ -1,6 +1,7 @@
 import { CATEGORY_LIST } from "./constantes";
 
 type TypeCategory = {
+  icon : string;
   text: string;
 };
 

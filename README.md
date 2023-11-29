@@ -37,9 +37,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## TO DO
 
-- [ ] Danes les détails, afficher les catégories
+- [X] Details : bug fix si horaires null
+- [X] Danes les détails, afficher les catégories
+- [X] Filtrer par Nombre de Ranking && note dès le début
 - [ ] Filtrer par Bar ouvert à l'heure actuelle
 - [ ] Afficher la distance par rapport à nous
-- [ ] Filtrer par Nombre de Ranking
+- [ ] Bug entre les filtres category & filtre de ranking
 - [ ] Enlever les any qui trainent
 
