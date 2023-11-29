@@ -1,7 +1,7 @@
 "use client";
 import type { FeatureCollection } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { GeoJSONSource } from "react-map-gl";
 import Map, { Layer, MapRef, Marker, Source } from "react-map-gl";
 import {
@@ -14,7 +14,6 @@ import { ButtonHideSiderBar } from "./ButtonHideSiderBar";
 import { ButtonSelectCategoryBar } from "./ButtonSelectCategoryBar";
 import CardBar from "./CardBar";
 import CardBarDetails from "./CardBarDetails";
-import ControlPanel from "./ControlPanel";
 import { FilterByRanking } from "./FilterByRanking";
 import Pin from "./Pin";
 
@@ -28,6 +27,20 @@ const START_POSITION = {
 export default function BarList(datas: DataFromApi) {
   const originList = reorderByTheBest(datas.data);
 
+  const [geoloc, setGeoloc] = useState<number[]>();
+
+  useLayoutEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGeoloc([pos.coords.longitude, pos.coords.latitude]);
+      },
+      () => {
+        console.log("erreur");
+        setGeoloc([0, 0]);
+      }
+    );
+  }, []);
+
   const [list, setList] = useState(datas.data);
   const [rating, setRating] = useState(3);
   const [showList, setShowList] = useState(false);
@@ -36,7 +49,6 @@ export default function BarList(datas: DataFromApi) {
 
   const [displayList, setDisplayList] = useState(5);
 
-  // map
   const mapRef = useRef<MapRef>(null);
 
   const onClickOnCircles = (event: any) => {
@@ -180,6 +192,7 @@ export default function BarList(datas: DataFromApi) {
                         <CardBar
                           key={item.id}
                           datas={item}
+                          geolocalisation={geoloc}
                           handleClick={onClickShowMoreDetail}
                         />
                       )
@@ -242,7 +255,6 @@ export default function BarList(datas: DataFromApi) {
             {pins}
           </Source>
         </Map>
-        <ControlPanel />
       </section>
     </>
   );

@@ -2,11 +2,11 @@ import { getCategoryDataFromId } from "../utils/displayCategoryDataFromId";
 import { Bar } from "../utils/type";
 import { SectionDataOpeningHours } from "./SectionDataOpeningHours";
 
+
 export default function CardBarDetails({ datas }: { datas: Bar }) {
   const horaires = JSON.parse(datas.opening_hours);
 
   const category = getCategoryDataFromId(datas.category);
-  console.log(category);
 
   return (
     <div className="bg-gray-800 rounded-lg p-4 m-4">
