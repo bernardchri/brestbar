@@ -1,8 +1,10 @@
+import { type } from "os";
+
 enum enumStatus {
   "OPERACTIONAL",
 }
 
-export type Bar = {
+export type Bar =  {
   id: number;
   name: string;
   location: {
