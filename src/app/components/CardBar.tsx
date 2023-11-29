@@ -1,6 +1,7 @@
 import { getCategoryDataFromId } from "../utils/displayCategoryDataFromId";
 import { Bar } from "../utils/type";
 // import * as turf from "@turf/turf";
+import * as turf from "@turf/turf";
 
 export default function CardBar({
   datas,
@@ -13,14 +14,14 @@ export default function CardBar({
 }) {
   const nameOfcat = getCategoryDataFromId(datas.category);
 
-  const distance = 0
-  // const distance = geolocalisation
-  //   ? turf.distance(
-  //       turf.point(datas.location.coordinates),
-  //       turf.point(geolocalisation ? geolocalisation : [0, 0]),
-  //       { units: "kilometers" }
-  //     )
-  //   : "NC";
+  // const distance = 0
+  const distance = geolocalisation
+    ? turf.distance(
+        turf.point(datas.location.coordinates),
+        turf.point(geolocalisation ? geolocalisation : [0, 0]),
+        { units: "kilometers" }
+      )
+    : "NC";
 
   return (
     <li className=" flex bg-gray-800 p-4 rounded-md my-4 w-full justify-between items-center">
